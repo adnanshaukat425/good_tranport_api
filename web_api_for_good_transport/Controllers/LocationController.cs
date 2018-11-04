@@ -18,7 +18,6 @@ namespace web_api_for_good_transport.Controllers
         public HttpResponseMessage get_location()
         {
             JObject obj = new JObject();
-            dynamic result = null;
             try
             {
                 List<Location> loc = new List<Location>();

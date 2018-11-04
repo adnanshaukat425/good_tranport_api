@@ -30,7 +30,6 @@ namespace web_api_for_good_transport.Controllers
                 cmd.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
 
                 bool _result = (bool)DAL.SelectScalar(sql, cmd);
-
                 obj["success"] = true;
                 obj["is_logged_in"] = _result;
             }
@@ -50,7 +49,7 @@ namespace web_api_for_good_transport.Controllers
             JObject obj = new JObject();
             try
             {
-                string sql = @"SELECT * from tbl_users where SmartTransport.dbo.isLogin(@email, @password) = 1";
+                string sql = @"SELECT * from tbl_users where SmartTransport.dbo.isLogin(@email, @password) = 1 AND email = @email";
                 SqlCommand cmd = new SqlCommand();
                 email = HttpUtility.UrlDecode(email);
                 password = HttpUtility.UrlDecode(password);
@@ -81,5 +80,47 @@ namespace web_api_for_good_transport.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+        
+        [System.Web.Http.Route("api/login/login_details")]
+        public HttpResponseMessage get_login_details()
+        {
+            string email = "a@a.com";
+            string password = "test";
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"SELECT * from tbl_users where SmartTransport.dbo.isLogin(@email, @password) = 1 AND email = @email";
+                SqlCommand cmd = new SqlCommand();
+                email = HttpUtility.UrlDecode(email);
+                password = HttpUtility.UrlDecode(password);
+
+                cmd.Parameters.Add("@email", SqlDbType.VarChar).Value = email;
+                cmd.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
+                User user = new User();
+
+                DataTable dt = DAL.Select(sql, cmd);
+                foreach (DataRow dr in dt.Rows)
+                {
+                    user.user_id = Convert.ToInt32(dr["user_id"].ToString());
+                    user.user_type_id = Convert.ToInt32(dr["user_type_id"].ToString());
+                    user.first_name = dr["first_name"].ToString();
+                    user.last_name = dr["last_name"].ToString();
+                    user.email = dr["email"].ToString();
+                    user.phone_number = dr["phone_number"].ToString();
+                    user.cnic_number = dr["cnic_number"].ToString();
+                    user.profile_picture = dr["profile_picture"].ToString();
+                    user.password = dr["password"].ToString();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, user);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+
     }
 }
