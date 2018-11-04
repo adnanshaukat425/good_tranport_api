@@ -6,13 +6,19 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Reflection;
 using System.Web;
+using System.Web.Script.Serialization;
 
-namespace Api.Models
+namespace web_api_for_good_transport.Models
 {
+    enum CMD_TYPES
+    {
+        INSERT, UPDATE
+    }
     public class DAL
     {
-        public static DbConnection get_connection(string server_type)
+        public static DbConnection GetConnection(string server_type)
         {
             string connection_string = "";
             DbConnection con = null;
@@ -30,7 +36,8 @@ namespace Api.Models
             }
             return con;
         }
-        public static DataTable select(string sql, OleDbCommand cmd = null)
+        
+        public static DataTable Select(string sql, OleDbCommand cmd = null)
         {
             if (cmd == null)
             {
@@ -38,7 +45,7 @@ namespace Api.Models
             }
 
             DataTable dt = new DataTable();
-            OleDbConnection con = (OleDbConnection)get_connection("access");
+            OleDbConnection con = (OleDbConnection)GetConnection("access");
             con.Open();
             cmd.CommandText = sql;
             cmd.Connection = con;
@@ -47,7 +54,8 @@ namespace Api.Models
             con.Close();
             return dt;
         }
-        public static DataTable select(string sql, SqlCommand cmd = null)
+        
+        public static DataTable Select(string sql, SqlCommand cmd = null)
         {
             if (cmd == null)
             {
@@ -55,7 +63,7 @@ namespace Api.Models
             }
 
             DataTable dt = new DataTable();
-            SqlConnection con = (SqlConnection)get_connection("sql");
+            SqlConnection con = (SqlConnection)GetConnection("sql");
             con.Open();
             cmd.CommandText = sql;
             cmd.Connection = con;
@@ -64,24 +72,45 @@ namespace Api.Models
             con.Close();
             return dt;
         }
-        public static string serializeDataTable(string sql, OleDbCommand cmd = null)
+
+        public static string SerializeDataTable(string sql, OleDbCommand cmd = null)
         {
-            DataTable dt = select(sql, cmd);
+            DataTable dt = Select(sql, cmd);
             return JsonConvert.SerializeObject(dt);
         }
-        public static string serializeDataTable(string sql, SqlCommand cmd = null)
+        
+        public static string SerializeDataTable(string sql, SqlCommand cmd = null)
         {
-            DataTable dt = select(sql, cmd);
-            return JsonConvert.SerializeObject(dt);
+            return SerializeDataTable(Select(sql, cmd));
         }
-        public static string create_update_delete(string sql, SqlCommand cmd = null)
+
+        public static string SerializeDataTable(DataTable dt)
+        {
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+            Dictionary<string, object> row = new Dictionary<string, object>();
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                row = new Dictionary<string, object>();
+                foreach (DataColumn col in dt.Columns)
+                {
+                    row.Add(col.ColumnName, dr[col].ToString());
+                }
+                rows.Add(row);
+            }
+
+            return serializer.Serialize(rows);
+        }
+
+        public static string CreateUpdateDelete(string sql, SqlCommand cmd = null)
         {
             if (cmd == null)
             {
                 cmd = new SqlCommand();
             }
 
-            SqlConnection con = (SqlConnection)get_connection("sql");
+            SqlConnection con = (SqlConnection)GetConnection("sql");
             cmd.CommandText = sql;
             cmd.Connection = con;
             con.Open();
@@ -89,20 +118,69 @@ namespace Api.Models
             con.Close();
             return rows_effected.ToString();
         }
-        public static string create_update_delete(string sql, OleDbCommand cmd = null)
+
+        public static string CreateUpdateDelete(string sql, OleDbCommand cmd = null)
         {
             if (cmd == null)
             {
                 cmd = new OleDbCommand();
             }
 
-            OleDbConnection con = (OleDbConnection)get_connection("access");
+            OleDbConnection con = (OleDbConnection)GetConnection("access");
             cmd.CommandText = sql;
             cmd.Connection = con;
             con.Open();
             int rows_effected = cmd.ExecuteNonQuery();
             con.Close();
             return rows_effected.ToString();
+        }
+
+        public static object SelectScalar(string sql, SqlCommand cmd)
+        {
+            SqlConnection con = (SqlConnection)GetConnection("sql");
+            cmd.CommandText = sql;
+            cmd.Connection = con;
+            con.Open();
+            object result = cmd.ExecuteScalar();
+            con.Close();
+            return result;
+        }
+
+        public static string get_sql(string cmd_type, string table_name, object obj, string[] restricted_col, out SqlCommand cmd)
+        {
+            cmd = new SqlCommand();
+            if (cmd_type.Trim().ToLower() == "insert")
+            {
+                return get_insert_sql(table_name, obj, restricted_col, out cmd);
+            }
+            return null;
+        }
+
+        private static string get_insert_sql(string table_name, object obj, string[] restricted_col, out SqlCommand cmd)
+        {
+            cmd = new SqlCommand();
+            string sql_keys = "";
+            string sql_values = "";
+            Type user_type = obj.GetType();
+            foreach (PropertyInfo prop in user_type.GetProperties())
+            {
+                if (prop.CanRead)
+                {
+                    string name = prop.Name;
+                    if (!restricted_col.Contains(name))
+                    {
+                        string value = prop.GetValue(obj, null).ToString();
+                        sql_keys += name + ",";
+                        sql_values += "@" + name + ",";
+                        cmd.Parameters.AddWithValue("@" + name, value);   
+                    }
+                }
+            }
+            sql_keys = sql_keys.Substring(0, sql_keys.Length - 1);
+            sql_values = sql_values.Substring(0, sql_values.Length - 1);
+
+            string sql = "INSERT INTO " + table_name + " (" + sql_keys + ") VALUES (" + sql_values + ")";
+            return sql;
         }
     }
 }

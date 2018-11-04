@@ -1,56 +1,75 @@
-﻿using Api.Models;
+﻿using web_api_for_good_transport.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Web.Http;
+using System.Net.Http;
+using System.Collections.Generic;
+using System.Data;
+using System.Net;
 
-namespace Api.Controllers
+namespace web_api_for_good_transport.Controllers
 {
     public class LocationController : ApiController
     {
         [System.Web.Http.Route("api/location/get_location")]
-        public IHttpActionResult get_location()
+        public HttpResponseMessage get_location()
         {
             JObject obj = new JObject();
             dynamic result = null;
             try
             {
+                List<Location> loc = new List<Location>();
                 string sql = @"select * from tbl_location";
-                obj["success"] = true;
-                obj["data"] = JsonConvert.DeserializeObject<dynamic>(DAL.serializeDataTable(sql, new SqlCommand()));
+                DataTable dt = DAL.Select(sql, new SqlCommand());
+                foreach (DataRow dr in dt.Rows)
+                {
+                    Location temp = new Location();
+                    temp.location_id = Convert.ToInt32(dr["location_id"].ToString());
+                    temp.location_name = dr["location_name"].ToString();
+                    temp.longitude = dr["longitude"].ToString();
+                    temp.latitude = dr["latitude"].ToString();
+                    loc.Add(temp);
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, loc);
             }
             catch (Exception ex)
             {
                 obj["success"] = false;
                 obj["data"] = ex.Message + " " + ex.StackTrace;
-                result = JsonConvert.DeserializeObject<dynamic>(obj.ToString());
             }
 
-            return Ok ( new { obj });
+            return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
         }
 
         [System.Web.Http.Route("api/location/get_location")]
-        public IHttpActionResult get_location_by_id(int location_id)
+        public HttpResponseMessage get_location_by_id(int location_id)
         {
-            string result = "";
-            JObject obj = new JObject(); 
+            JObject obj = new JObject();
             try
             {
+                Location loc = new Location();
                 string sql = @"select * from tbl_location where location_id = @location_id";
-                OleDbCommand cmd = new OleDbCommand();
+                SqlCommand cmd = new SqlCommand();
                 cmd.Parameters.AddWithValue("@location_id", location_id);
-                obj["success"] = true;
-                obj["data"] = JsonConvert.DeserializeObject<dynamic>(DAL.serializeDataTable(sql, new SqlCommand()));
+                DataTable dt = DAL.Select(sql, cmd);
+                foreach (DataRow dr in dt.Rows)
+                {
+                    loc.location_id = Convert.ToInt32(dr["location_id"].ToString());
+                    loc.location_name = dr["location_name"].ToString();
+                    loc.longitude = dr["longitude"].ToString();
+                    loc.latitude = dr["latitude"].ToString();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, loc);
             }
             catch (Exception ex)
             {
-                obj["success"] = false; 
+                obj["success"] = false;
                 obj["data"] = ex.Message + " " + ex.StackTrace;
-                result = JsonConvert.DeserializeObject<dynamic>(obj.ToString());
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
-            return Ok(new { obj });
         }
     }
 }
