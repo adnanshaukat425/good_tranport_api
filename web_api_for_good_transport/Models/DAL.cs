@@ -37,23 +37,23 @@ namespace web_api_for_good_transport.Models
             return con;
         }
         
-        public static DataTable Select(string sql, OleDbCommand cmd = null)
-        {
-            if (cmd == null)
-            {
-                cmd = new OleDbCommand();
-            }
+        //public static DataTable Select(string sql, OleDbCommand cmd = null)
+        //{
+        //    if (cmd == null)
+        //    {
+        //        cmd = new OleDbCommand();
+        //    }
 
-            DataTable dt = new DataTable();
-            OleDbConnection con = (OleDbConnection)GetConnection("access");
-            con.Open();
-            cmd.CommandText = sql;
-            cmd.Connection = con;
-            OleDbDataAdapter sda = new OleDbDataAdapter(cmd);
-            sda.Fill(dt);
-            con.Close();
-            return dt;
-        }
+        //    DataTable dt = new DataTable();
+        //    OleDbConnection con = (OleDbConnection)GetConnection("access");
+        //    con.Open();
+        //    cmd.CommandText = sql;
+        //    cmd.Connection = con;
+        //    OleDbDataAdapter sda = new OleDbDataAdapter(cmd);
+        //    sda.Fill(dt);
+        //    con.Close();
+        //    return dt;
+        //}
         
         public static DataTable Select(string sql, SqlCommand cmd = null)
         {
@@ -73,11 +73,11 @@ namespace web_api_for_good_transport.Models
             return dt;
         }
 
-        public static string SerializeDataTable(string sql, OleDbCommand cmd = null)
-        {
-            DataTable dt = Select(sql, cmd);
-            return JsonConvert.SerializeObject(dt);
-        }
+        //public static string SerializeDataTable(string sql, OleDbCommand cmd = null)
+        //{
+        //    DataTable dt = Select(sql, cmd);
+        //    return JsonConvert.SerializeObject(dt);
+        //}
         
         public static string SerializeDataTable(string sql, SqlCommand cmd = null)
         {
@@ -181,6 +181,23 @@ namespace web_api_for_good_transport.Models
 
             string sql = "INSERT INTO " + table_name + " (" + sql_keys + ") VALUES (" + sql_values + ")";
             return sql;
+        }
+
+        public static object get_mapped_object(List<object> obj, DataTable dt, object resultant_object)
+        {
+            Type users = obj.GetType();
+            
+            for (int i = 0; i < obj.Count; i++)
+            {
+                int count = 0;
+                obj[i] = new Object();
+                PropertyInfo[] properties = obj[i].GetType().GetProperties();
+                foreach (PropertyInfo property in properties)
+                {
+                    property.SetValue(obj[i], dt.Rows[count++][property.Name]);
+                }
+            }
+            return obj;
         }
     }
 }

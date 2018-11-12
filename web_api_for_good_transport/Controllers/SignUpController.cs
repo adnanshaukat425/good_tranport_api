@@ -35,6 +35,5 @@ namespace web_api_for_good_transport.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
-
     }
 }
