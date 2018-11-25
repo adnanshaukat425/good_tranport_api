@@ -82,6 +82,11 @@
     <Compile Include="Controllers\DriverController.cs" />
     <Compile Include="Controllers\LocationController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\OrderController.cs" />
+    <Compile Include="Models\Cargo.cs" />
+    <Compile Include="Models\Container.cs" />
+    <Compile Include="Models\MeasurementUnit.cs" />
+    <Compile Include="Models\Order.cs" />
     <Compile Include="Controllers\SignUpController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
@@ -96,6 +101,8 @@
     <Content Include="packages.config" />
     <None Include="Properties\PublishProfiles\local.pubxml" />
     <None Include="Properties\PublishProfiles\local_deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\smartgoodstransport - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\smartgoodstransport - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\test_publish.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

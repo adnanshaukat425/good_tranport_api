@@ -11,7 +11,7 @@ using System.Web.Http;
 using System.Data;
 using System.Web;
 
-namespace web_api_for_good_transport.Controllers
+namespace web_api_for_good_transport.Models
 {
     public class LoginController : ApiController
     {

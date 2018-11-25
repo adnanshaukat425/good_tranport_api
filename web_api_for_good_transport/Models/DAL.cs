@@ -25,6 +25,7 @@ namespace web_api_for_good_transport.Models
             if (server_type == "sql")
             {
                 connection_string = @"Data Source= .;Initial Catalog= SmartTransport;Integrated Security=true;";
+                //connection_string = @"Server=den1.mssql8.gear.host;Database=smarttransport1;User Id=smarttransport1;Password=Hp6ssx64-8-0;";
                 SqlConnection sql_con = new SqlConnection(connection_string);
                 con = sql_con;
             }
@@ -198,6 +199,37 @@ namespace web_api_for_good_transport.Models
                 }
             }
             return obj;
+        }
+
+        public static DataTable RunStoreProc(object obj, string stored_proc)
+        {
+            SqlCommand cmd = new SqlCommand();
+            string[] restricted_col = new string[] { "order_id" };
+            Type user_type = obj.GetType();
+            foreach (PropertyInfo prop in user_type.GetProperties())
+            {
+                if (prop.CanRead)
+                {
+                    string name = prop.Name;
+                    if (!restricted_col.Contains(name))
+                    {
+                        string value = prop.GetValue(obj, null).ToString();
+                        if (prop.PropertyType == typeof(DateTime))
+                        {
+                            SqlParameter par = new SqlParameter("@" + name, SqlDbType.DateTime);
+                            par.Value = value;
+                            cmd.Parameters.Add(par);
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue("@" + name, value);
+                        }
+                    }
+                }
+            }
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+            return DAL.Select(stored_proc, cmd);
         }
     }
 }

@@ -10,7 +10,7 @@ using System.Web;
 using System.Web.Http;
 using web_api_for_good_transport.Models;
 
-namespace web_api_for_good_transport.Controllers
+namespace web_api_for_good_transport.Models
 {
     public class UserController : ApiController
     {
