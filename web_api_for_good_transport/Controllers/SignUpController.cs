@@ -23,7 +23,6 @@ namespace web_api_for_good_transport.Controllers
             JObject obj = new JObject();
             try
             {
-                //File.AppendAllText(@"D:\FYP\Log_good_transport.txt", req.ToString() + "OKKK");
                 SqlCommand cmd = new SqlCommand();
                 string sql = DAL.get_sql("insert", "tbl_users", user, new string[] { "user_id" }, out cmd) + ";SELECT IDENT_CURRENT('tbl_users')";
                 string result = DAL.SelectScalar(sql, cmd).ToString();

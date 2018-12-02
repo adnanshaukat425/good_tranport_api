@@ -70,5 +70,67 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [System.Web.Http.Route("api/location/get_all_source")]
+        public HttpResponseMessage get_all_source()
+        {
+            JObject obj = new JObject();
+            try
+            {
+                List<Location> loc = new List<Location>();
+                string sql = @"spGetAllSource";
+
+                DataTable dt = DAL.Select(sql);
+                foreach (DataRow dr in dt.Rows)
+                {
+                    Location temp = new Location();
+                    temp.location_id = Convert.ToInt32(dr["source_id"].ToString());
+                    temp.location_name = dr["location_name"].ToString();
+                    temp.latitude = dr["latitude"].ToString();
+                    temp.longitude = dr["longitude"].ToString();
+                    loc.Add(temp);
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, loc);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+            }
+
+            return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+        }
+
+        [System.Web.Http.Route("api/location/get_all_source_wrt_destination")]
+        public HttpResponseMessage get_all_destination_wrt_source(string source_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                List<Location> loc = new List<Location>();
+                string sql = @"spGetDestinationWRTSource";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@source_id", source_id);
+                cmd.CommandType = CommandType.StoredProcedure;
+                DataTable dt = DAL.Select(sql, cmd);
+                foreach (DataRow dr in dt.Rows)
+                {
+                    Location temp = new Location();
+                    temp.location_id = Convert.ToInt32(dr["destination_id"].ToString());
+                    temp.location_name = dr["location_name"].ToString();
+                    temp.latitude = dr["latitude"].ToString();
+                    temp.longitude = dr["longitude"].ToString();
+                    loc.Add(temp);
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, loc);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+            }
+
+            return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+        }
     }
 }
