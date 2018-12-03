@@ -87,7 +87,7 @@ namespace web_api_for_good_transport.Models
                                 on u.user_id = dv.driver_id
                                 inner join tbl_vehicle v
                                 on v.vehicle_id = dv.vehicle_id
-                                where v.tansporter_id = @transporter_id";
+                                where v.transporter_id = @transporter_id";
 
                 cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
                 
