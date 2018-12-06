@@ -103,5 +103,35 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [System.Web.Http.Route("api/dirver/get_active_driver_wrt_transporter")]
+        public HttpResponseMessage get_active_driver_wrt_transporter(string transporter_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                SqlCommand cmd = new SqlCommand();
+                string sql = @" select u.* from tbl_users u
+                                inner join tbl_driver_vehicle dv
+                                on u.user_id = dv.driver_id
+                                inner join tbl_vehicle v
+                                on v.vehicle_id = dv.vehicle_id
+                                where v.transporter_id = @transporter_id and status = @status";
+
+                cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
+                cmd.Parameters.AddWithValue("@status", 1);
+
+                string result = DAL.SerializeDataTable(sql, cmd);
+                var drivers = JsonConvert.DeserializeObject(result);
+
+                return Request.CreateResponse(HttpStatusCode.OK, drivers);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }
