@@ -84,6 +84,7 @@
     <Compile Include="Controllers\LocationController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
+    <Compile Include="Controllers\VehicleController.cs" />
     <Compile Include="Models\Cargo.cs" />
     <Compile Include="Models\Container.cs" />
     <Compile Include="Models\MeasurementUnit.cs" />
