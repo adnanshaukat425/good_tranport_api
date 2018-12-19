@@ -16,5 +16,6 @@ namespace web_api_for_good_transport.Models
         public string cnic_number { get; set; }
         public string profile_picture { get; set; }
         public string password { get; set; }
+        public DateTime created_date { get; set; }
     }
 }

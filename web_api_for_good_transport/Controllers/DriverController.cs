@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
@@ -51,8 +52,7 @@ namespace web_api_for_good_transport.Models
             try
             {
                 SqlCommand cmd = new SqlCommand();
-                string sql = @"select user_id, first_name, last_name, email, 
-                                phone_number, cnic_number, profile_picture, ut.user_type
+                string sql = @"select u.*
                                 from tbl_users u
                                 inner join tbl_user_type ut
                                 on u.user_type_id = ut.user_type_id
@@ -82,15 +82,11 @@ namespace web_api_for_good_transport.Models
             try
             {
                 SqlCommand cmd = new SqlCommand();
-                string sql = @" select u.* from tbl_users u
-                                inner join tbl_driver_vehicle dv
-                                on u.user_id = dv.driver_id
-                                inner join tbl_vehicle v
-                                on v.vehicle_id = dv.vehicle_id
-                                where v.transporter_id = @transporter_id";
+                string sql = @"spGetAllDriversWrtTransporter";
 
                 cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
-                
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
                 string result = DAL.SerializeDataTable(sql, cmd);
                 var drivers = JsonConvert.DeserializeObject(result);
 
@@ -111,15 +107,11 @@ namespace web_api_for_good_transport.Models
             try
             {
                 SqlCommand cmd = new SqlCommand();
-                string sql = @" select u.* from tbl_users u
-                                inner join tbl_driver_vehicle dv
-                                on u.user_id = dv.driver_id
-                                inner join tbl_vehicle v
-                                on v.vehicle_id = dv.vehicle_id
-                                where v.transporter_id = @transporter_id and status = @status";
+                string sql = @"spGetActiveDriversWrtTransporter";
 
                 cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
                 cmd.Parameters.AddWithValue("@status", 1);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
                 string result = DAL.SerializeDataTable(sql, cmd);
                 var drivers = JsonConvert.DeserializeObject(result);
@@ -133,5 +125,36 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [System.Web.Http.Route("api/dirver/update_drivers_vehicle")]
+        public HttpResponseMessage update_drivers_vehicle([FromBody] Object json_data)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string json = json_data.ToString();
+                dynamic obje = JsonConvert.DeserializeObject(json);
+                string user_id = obje.user_id;
+                string vehicle_id = obje.vehicle_id;
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.Add("@user_id", user_id);
+                cmd.Parameters.Add("@vehicle_id", vehicle_id);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                DataTable dt = DAL.Select("spUpdateDriverVehicle", cmd);
+                if (dt.Rows[0]["result"].ToString() == "-1")
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, "Already assign to another driver");
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, "Assign successfully");
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+        
     }
 }

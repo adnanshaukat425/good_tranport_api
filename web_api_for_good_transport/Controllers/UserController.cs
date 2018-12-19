@@ -85,5 +85,30 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [System.Web.Http.Route("api/user/change_password")]
+        public HttpResponseMessage change_password(string user_id, string password)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"spChangePassword";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@user_id", user_id);
+                cmd.Parameters.AddWithValue("@password", password);
+
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                DAL.CreateUpdateDelete(sql, cmd);
+
+                return Request.CreateResponse(HttpStatusCode.OK, true);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }
