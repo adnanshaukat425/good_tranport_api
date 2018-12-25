@@ -46,6 +46,7 @@ namespace web_api_for_good_transport.Controllers
                 List<Cargo> cargo = get_cargo();
                 List<MeasurementUnit> measurement_unit = get_measurement_unit();
                 List<Container> container = get_container();
+                List<Location> source = get_sources();
 
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 JsonSerializerSettings se = new JsonSerializerSettings();
@@ -53,6 +54,7 @@ namespace web_api_for_good_transport.Controllers
                 obj["cargo"] = JsonConvert.SerializeObject(cargo);
                 obj["measurement_unit"] = JsonConvert.SerializeObject(measurement_unit);
                 obj["container"] = JsonConvert.SerializeObject(container);
+                obj["source"] = JsonConvert.SerializeObject(source);
 
                 return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
             }
@@ -137,6 +139,30 @@ namespace web_api_for_good_transport.Controllers
             return container;
         }
 
+        private List<Location> get_sources()
+        {
+            List<Location> source = new List<Location>();
+            string sql = @"spGetSources";
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = sql;
+            SqlConnection con = (SqlConnection)DAL.GetConnection("sql");
+            con.Open();
+            cmd.Connection = con;
+            SqlDataReader sdr = cmd.ExecuteReader();
+            while (sdr.Read())
+            {
+                Location s1 = new Location();
+                s1.location_id = Convert.ToInt32(sdr["source_id"].ToString());
+                s1.location_name = sdr["location_name"].ToString();
+                s1.latitude = sdr["latitude"].ToString();
+                s1.longitude = sdr["longitude"].ToString();
+
+                source.Add(s1);
+            }
+            con.Close();
+            return source;
+        }
         #endregion
     }
 }

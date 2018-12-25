@@ -101,7 +101,7 @@ namespace web_api_for_good_transport.Models
             return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
         }
 
-        [System.Web.Http.Route("api/location/get_all_source_wrt_destination")]
+        [System.Web.Http.Route("api/location/get_all_destination_wrt_source")]
         public HttpResponseMessage get_all_destination_wrt_source(string source_id)
         {
             JObject obj = new JObject();
