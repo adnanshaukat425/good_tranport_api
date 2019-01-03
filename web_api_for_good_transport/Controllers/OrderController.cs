@@ -25,7 +25,18 @@ namespace web_api_for_good_transport.Controllers
             try
             {
                 DataTable result = DAL.RunStoreProc(order, "spPlaceOrder");
-                order.order_id = Convert.ToInt32(result.Rows[0][0].ToString());
+                Type user_type = order.GetType();
+                int i = 0;
+                order.order_id = Convert.ToInt32(result.Rows[0]["order_id"].ToString());
+                //foreach (PropertyInfo prop in user_type.GetProperties())
+                //{
+                //    if (prop.CanRead)
+                //    {
+                //        string name = prop.Name;
+                //        Type prop_type = prop.PropertyType;
+                //        prop.SetValue(order,Convert.ChangeType(result.Rows[i][name], prop_type));
+                //    }
+                //}
                 return Request.CreateResponse(HttpStatusCode.OK, order);
             }
             catch (Exception ex)
