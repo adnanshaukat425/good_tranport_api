@@ -24,7 +24,7 @@ namespace web_api_for_good_transport.Controllers
             try
             {
                 SqlCommand cmd = new SqlCommand();
-                string sql = DAL.get_sql("insert", "tbl_users", user, new string[] { "user_id" }, out cmd) + ";SELECT IDENT_CURRENT('tbl_users')";
+                string sql = DAL.get_sql("insert", "tbl_users", user, new string[] { "user_id" }, "", out cmd) + ";SELECT IDENT_CURRENT('tbl_users')";
                 string result = DAL.SelectScalar(sql, cmd).ToString();
                 user.user_id = Convert.ToInt32(result);
                 return Request.CreateResponse(HttpStatusCode.OK, user);

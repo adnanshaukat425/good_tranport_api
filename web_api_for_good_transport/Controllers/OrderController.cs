@@ -47,6 +47,9 @@ namespace web_api_for_good_transport.Controllers
                 List<MeasurementUnit> measurement_unit = get_measurement_unit();
                 List<Container> container = get_container();
                 List<Location> source = get_sources();
+                List<ContainerSize> container_size = get_container_size();
+                List<WeightCatagory> weight_catagory = get_weight_catagory();
+                List<PaymentType> payment_type = get_payment_types();
 
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 JsonSerializerSettings se = new JsonSerializerSettings();
@@ -54,7 +57,10 @@ namespace web_api_for_good_transport.Controllers
                 obj["cargo"] = JsonConvert.SerializeObject(cargo);
                 obj["measurement_unit"] = JsonConvert.SerializeObject(measurement_unit);
                 obj["container"] = JsonConvert.SerializeObject(container);
+                obj["container_size"] = JsonConvert.SerializeObject(container_size);
+                obj["weight_catagory"] = JsonConvert.SerializeObject(weight_catagory);
                 obj["source"] = JsonConvert.SerializeObject(source);
+                obj["payment_type"] = JsonConvert.SerializeObject(payment_type);
 
                 return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
             }
@@ -162,6 +168,51 @@ namespace web_api_for_good_transport.Controllers
             }
             con.Close();
             return source;
+        }
+
+        private List<ContainerSize> get_container_size()
+        {
+            List<ContainerSize> containerSize = new List<ContainerSize>();
+            string sql = @"select * from tbl_vehicle_type";
+            DataTable dt = DAL.Select(sql);
+            foreach (DataRow item in dt.Rows)
+            {
+                ContainerSize c1 = new ContainerSize();
+                c1.vehicle_type_id = Convert.ToInt32(item["vehicle_type_id"].ToString());
+                c1.vehicle_type = item["vehicle_type"].ToString();
+                containerSize.Add(c1);
+            }
+            return containerSize;
+        }
+
+        private List<WeightCatagory> get_weight_catagory()
+        {
+            List<WeightCatagory> weightCatagory = new List<WeightCatagory>();
+            string sql = @"select * from tbl_weight_catagory";
+            DataTable dt = DAL.Select(sql);
+            foreach (DataRow item in dt.Rows)
+            {
+                WeightCatagory c1 = new WeightCatagory();
+                c1.weight_id = Convert.ToInt32(item["weight_id"].ToString());
+                c1.weight_catagory = item["weight_catagory"].ToString();
+                weightCatagory.Add(c1);
+            }
+            return weightCatagory;
+        }
+
+        private List<PaymentType> get_payment_types()
+        {
+            List<PaymentType> paymentType = new List<PaymentType>();
+            string sql = @"select * from tbl_payment_type";
+            DataTable dt = DAL.Select(sql);
+            foreach (DataRow item in dt.Rows)
+            {
+                PaymentType p1 = new PaymentType();
+                p1.payment_type_id= Convert.ToInt32(item["payment_type_id"].ToString());
+                p1.payment_type = item["payment_type"].ToString();
+                paymentType.Add(p1);
+            }
+            return paymentType;
         }
         #endregion
     }

@@ -147,12 +147,16 @@ namespace web_api_for_good_transport.Models
             return result;
         }
 
-        public static string get_sql(string cmd_type, string table_name, object obj, string[] restricted_col, out SqlCommand cmd)
+        public static string get_sql(string cmd_type, string table_name, object obj, string[] restricted_col, string where_clause, out SqlCommand cmd)
         {
             cmd = new SqlCommand();
             if (cmd_type.Trim().ToLower() == "insert")
             {
                 return get_insert_sql(table_name, obj, restricted_col, out cmd);
+            }
+            else if (cmd_type.Trim().ToLower() == "update")
+            {
+                return get_update_sql(table_name, obj, restricted_col, where_clause, out cmd);
             }
             return null;
         }
@@ -181,6 +185,32 @@ namespace web_api_for_good_transport.Models
             sql_values = sql_values.Substring(0, sql_values.Length - 1);
 
             string sql = "INSERT INTO " + table_name + " (" + sql_keys + ") VALUES (" + sql_values + ")";
+            return sql;
+        }
+
+        private static string get_update_sql(string table_name, object obj, string[] restricted_col, string where_clause, out SqlCommand cmd)
+        {
+            cmd = new SqlCommand();
+            string sql_keys = "";
+            Type user_type = obj.GetType();
+            foreach (PropertyInfo prop in user_type.GetProperties())
+            {
+                if (prop.CanRead)
+                {
+                    //update tbl_name set name = @name, asdlfd = @asdf,
+                    string name = prop.Name;
+                    if (!restricted_col.Contains(name))
+                    {
+                        string value = prop.GetValue(obj, null).ToString();
+                        sql_keys += name + "=" + "@" + name + ",";
+                        //sql_values += "@" + name + ",";
+                        cmd.Parameters.AddWithValue("@" + name, value);
+                    }
+                }
+            }
+            sql_keys = sql_keys.Substring(0, sql_keys.Length - 1);
+
+            string sql = "UPDATE " + table_name + " set " + sql_keys + " WHERE " + where_clause;
             return sql;
         }
 

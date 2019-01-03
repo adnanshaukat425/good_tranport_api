@@ -110,5 +110,28 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [System.Web.Http.Route("api/user/update_user")]
+        public HttpResponseMessage update_user([FromBody] User user)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                SqlCommand cmd = new SqlCommand();
+                string sql = DAL.get_sql("update", "tbl_users", user, new string[]{"user_id"} ,"user_id = " + user.user_id, out cmd) + ";SELECT IDENT_CURRENT('tbl_users')";
+                int result = Convert.ToInt32(DAL.CreateUpdateDelete(sql, cmd).ToString());
+                if (result > 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, true);                    
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, false);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }
