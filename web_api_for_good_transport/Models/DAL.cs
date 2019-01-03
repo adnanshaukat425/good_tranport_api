@@ -247,7 +247,7 @@ namespace web_api_for_good_transport.Models
                         if (prop.PropertyType == typeof(DateTime))
                         {
                             SqlParameter par = new SqlParameter("@" + name, SqlDbType.DateTime);
-                            par.Value = value;
+                            par.Value = DateTime.Now.ToString("yyyy-MM-dd");
                             cmd.Parameters.Add(par);
                         }
                         else
