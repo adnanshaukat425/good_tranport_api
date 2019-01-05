@@ -74,7 +74,7 @@ namespace web_api_for_good_transport.Models
             }
         }
 
-        [System.Web.Http.Route("api/dirver/get_driver_wrt_transporter")]
+        [System.Web.Http.Route("api/driver/get_driver_wrt_transporter")]
         public HttpResponseMessage get_driver_wrt_transporter(string transporter_id)
         {
             //string transporter_id = "7";
@@ -100,7 +100,7 @@ namespace web_api_for_good_transport.Models
             }
         }
 
-        [System.Web.Http.Route("api/dirver/get_active_driver_wrt_transporter")]
+        [System.Web.Http.Route("api/driver/get_active_driver_wrt_transporter")]
         public HttpResponseMessage get_active_driver_wrt_transporter(string transporter_id)
         {
             JObject obj = new JObject();
@@ -126,7 +126,7 @@ namespace web_api_for_good_transport.Models
             }
         }
 
-        [System.Web.Http.Route("api/dirver/update_drivers_vehicle")]
+        [System.Web.Http.Route("api/driver/update_drivers_vehicle")]
         public HttpResponseMessage update_drivers_vehicle([FromBody] Object json_data)
         {
             JObject obj = new JObject();
@@ -155,6 +155,54 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
-        
+
+        [HttpPost]
+        [System.Web.Http.Route("api/driver/get_driver_wrt_order")]
+        public HttpResponseMessage get_driver_wrt_order([FromBody] Order order)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "spGetDriverWRTOrder";
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@container_type_id", order.container_type_id);
+                cmd.Parameters.AddWithValue("@vehicle_type_id", order.vehicle_type_id);
+
+                DataTable driver_details = DAL.Select(sql, cmd);
+
+                sql = "spGetLocationLatLong";
+                cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@location_id", order.source_id);
+
+                DataTable source_details = DAL.Select(sql, cmd);
+                driver_details.Columns.Add("distance");
+                driver_details.Columns.Add("order_id");
+                for (int i = 0; i < driver_details.Rows.Count; i++)
+                {
+                    driver_details.Rows[i]["distance"] = Math.Sqrt(
+                        Math.Pow(Convert.ToSingle(driver_details.Rows[i]["current_latitude"].ToString()) -
+                        Convert.ToSingle(source_details.Rows[0]["latitude"].ToString()), 2) +
+                        Math.Pow(Convert.ToSingle(driver_details.Rows[i]["current_longitude"].ToString()) -
+                        Convert.ToSingle(source_details.Rows[0]["longitude"].ToString()), 2));
+
+                    driver_details.Rows[i]["order_id"] = order.order_id;
+                }
+                DataView dv = driver_details.DefaultView;
+                dv.Sort = "distance asc";
+                DataTable sorted_dataTable = dv.ToTable();
+
+                obj["drivers"] = DAL.SerializeDataTable(sorted_dataTable);
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
     }
 }

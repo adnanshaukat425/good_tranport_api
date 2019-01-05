@@ -132,5 +132,33 @@ namespace web_api_for_good_transport.Models
 
             return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
         }
+
+        [System.Web.Http.Route("api/location/update_current_lat_long")]
+        public HttpResponseMessage update_current_lat_long(int user_id, string latitude, string longitude)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"spUpdateLatLong";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@user_id", user_id);
+                cmd.Parameters.AddWithValue("@latitude", latitude);
+                cmd.Parameters.AddWithValue("@longitude", longitude);
+
+                cmd.CommandType = CommandType.StoredProcedure;
+                DataTable dt = DAL.Select(sql, cmd);
+                obj["success"] = true;
+                obj["data"] = "updated";
+                return Request.CreateResponse(HttpStatusCode.OK, obj);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+
+            
+        }
     }
 }
