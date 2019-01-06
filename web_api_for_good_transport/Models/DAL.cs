@@ -87,7 +87,6 @@ namespace web_api_for_good_transport.Models
 
         public static string SerializeDataTable(DataTable dt)
         {
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
             List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
             Dictionary<string, object> row = new Dictionary<string, object>();
 
@@ -101,7 +100,7 @@ namespace web_api_for_good_transport.Models
                 rows.Add(row);
             }
 
-            return serializer.Serialize(rows);
+            return JsonConvert.SerializeObject(rows);
         }
 
         public static string CreateUpdateDelete(string sql, SqlCommand cmd = null)
@@ -175,9 +174,12 @@ namespace web_api_for_good_transport.Models
                     if (!restricted_col.Contains(name))
                     {
                         string value = prop.GetValue(obj, null).ToString();
-                        sql_keys += name + ",";
-                        sql_values += "@" + name + ",";
-                        cmd.Parameters.AddWithValue("@" + name, value);   
+                        if (!String.IsNullOrEmpty(value))
+                        {
+                            sql_keys += name + ",";
+                            sql_values += "@" + name + ",";
+                            cmd.Parameters.AddWithValue("@" + name, value);   
+                        }
                     }
                 }
             }

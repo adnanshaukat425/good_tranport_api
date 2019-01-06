@@ -122,9 +122,10 @@ namespace web_api_for_good_transport.Models
                 int result = Convert.ToInt32(DAL.CreateUpdateDelete(sql, cmd).ToString());
                 if (result > 0)
                 {
-                    return Request.CreateResponse(HttpStatusCode.OK, true);                    
+                    return get_user_by_id(user.user_id.ToString());
+                    //return Request.CreateResponse(HttpStatusCode.OK, true);                    
                 }
-                return Request.CreateResponse(HttpStatusCode.OK, false);
+                return Request.CreateResponse(HttpStatusCode.OK, user);
             }
             catch (Exception ex)
             {

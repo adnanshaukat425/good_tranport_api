@@ -36,5 +36,28 @@ namespace web_api_for_good_transport.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        
+        [System.Web.Http.Route("api/signup/add_driver_to_transporter")]
+        [HttpGet]
+        public HttpResponseMessage add_driver_to_transporter(string driver_id, string transporter_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"INSERT INTO tbl_driver_transporter (driver_id, transporter_id) VALUES (@driver_id, @transporter_id)";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
+                DAL.CreateUpdateDelete(sql, cmd);
+                return Request.CreateResponse(HttpStatusCode.OK, true);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }
