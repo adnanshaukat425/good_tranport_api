@@ -24,6 +24,16 @@ namespace web_api_for_good_transport.Controllers
             try
             {
                 SqlCommand cmd = new SqlCommand();
+                string s = @"select count(user_id) from tbl_users where Lower(email) = Lower(@email)";
+                cmd.Parameters.AddWithValue("@email", user.email);
+                object ob = DAL.SelectScalar(s, cmd);
+                int count = ob != null ? Convert.ToInt32(ob.ToString()) : 1;
+                if (count > 0)
+                {
+                    user.user_id = -2;
+                    return Request.CreateResponse(HttpStatusCode.OK, user);                   
+                }
+                cmd = new SqlCommand();
                 string sql = DAL.get_sql("insert", "tbl_users", user, new string[] { "user_id" }, "", out cmd) + ";SELECT IDENT_CURRENT('tbl_users')";
                 string result = DAL.SelectScalar(sql, cmd).ToString();
                 user.user_id = Convert.ToInt32(result);
@@ -37,7 +47,35 @@ namespace web_api_for_good_transport.Controllers
             }
         }
 
-        
+        [System.Web.Http.Route("api/signup/check_if_email_already_present")]
+        [HttpPost]
+        public HttpResponseMessage check_if_email_already_present([FromBody] User user)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                SqlCommand cmd = new SqlCommand();
+                string s = @"select count(user_id) from tbl_users where Lower(email) = Lower(@email)";
+                cmd.Parameters.AddWithValue("@email", user.email);
+                object ob = DAL.SelectScalar(s, cmd);
+                int count = ob != null ? Convert.ToInt32(ob.ToString()) : 1;
+                if (count > 0)
+                {
+                    user.user_id = -2;
+                    return Request.CreateResponse(HttpStatusCode.OK, user);
+                }
+                cmd = new SqlCommand();
+                user.user_id = -1;
+                return Request.CreateResponse(HttpStatusCode.OK, user);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
         [System.Web.Http.Route("api/signup/add_driver_to_transporter")]
         [HttpGet]
         public HttpResponseMessage add_driver_to_transporter(string driver_id, string transporter_id)

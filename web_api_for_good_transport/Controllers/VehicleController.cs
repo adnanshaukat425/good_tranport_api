@@ -20,7 +20,7 @@ namespace web_api_for_good_transport.Controllers
             try
             {
                 SqlCommand cmd = new SqlCommand();
-                string sql = @"spGetVehicleWrtTransporter";
+                string sql = @"spGetUnAssignVehicleWrtTransporter";
 
                 cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;

@@ -127,6 +127,7 @@ namespace web_api_for_good_transport.Models
         }
 
         [System.Web.Http.Route("api/driver/update_drivers_vehicle")]
+        [HttpPost]
         public HttpResponseMessage update_drivers_vehicle([FromBody] Object json_data)
         {
             JObject obj = new JObject();
@@ -137,8 +138,16 @@ namespace web_api_for_good_transport.Models
                 string user_id = obje.user_id;
                 string vehicle_id = obje.vehicle_id;
                 SqlCommand cmd = new SqlCommand();
-                cmd.Parameters.Add("@user_id", user_id);
-                cmd.Parameters.Add("@vehicle_id", vehicle_id);
+                cmd.Parameters.AddWithValue("@user_id", user_id);
+                if (vehicle_id == "0")
+                {
+                    cmd.Parameters.AddWithValue("@vehicle_id", DBNull.Value);    
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@vehicle_id", vehicle_id);
+                }
+                
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
                 DataTable dt = DAL.Select("spUpdateDriverVehicle", cmd);
