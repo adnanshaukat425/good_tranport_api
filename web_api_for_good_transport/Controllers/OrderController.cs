@@ -28,15 +28,6 @@ namespace web_api_for_good_transport.Controllers
                 Type user_type = order.GetType();
                 int i = 0;
                 order.order_id = Convert.ToInt32(result.Rows[0]["order_id"].ToString());
-                //foreach (PropertyInfo prop in user_type.GetProperties())
-                //{
-                //    if (prop.CanRead)
-                //    {
-                //        string name = prop.Name;
-                //        Type prop_type = prop.PropertyType;
-                //        prop.SetValue(order,Convert.ChangeType(result.Rows[i][name], prop_type));
-                //    }
-                //}
                 return Request.CreateResponse(HttpStatusCode.OK, order);
             }
             catch (Exception ex)
@@ -49,29 +40,57 @@ namespace web_api_for_good_transport.Controllers
 
         [System.Web.Http.Route("api/order/get_pre_order_form_data")]
         [HttpGet]
-        public HttpResponseMessage GetPreOrderFormData()
+        public HttpResponseMessage GetPreOrderFormData(bool is_cargo, bool is_measurement_unit, bool is_container, bool is_source, bool is_container_size, bool is_weight_catagory, bool is_payment_type)
         {
             JObject obj = new JObject();
             try
             {
-                List<Cargo> cargo = get_cargo();
-                List<MeasurementUnit> measurement_unit = get_measurement_unit();
-                List<Container> container = get_container();
-                List<Location> source = get_sources();
-                List<ContainerSize> container_size = get_container_size();
-                List<WeightCatagory> weight_catagory = get_weight_catagory();
-                List<PaymentType> payment_type = get_payment_types();
+                List<Cargo> cargo = new List<Cargo>();
+                List<MeasurementUnit> measurement_unit = new List<MeasurementUnit>();
+                List<Container> container = new List<Container>();
+                List<Location> source = new List<Location>();
+                List<ContainerSize> container_size = new List<ContainerSize>();
+                List<WeightCatagory> weight_catagory = new List<WeightCatagory>();
+                List<PaymentType> payment_type = new List<PaymentType>();
+
+                if (is_cargo)
+                {
+                    cargo = get_cargo();
+                    obj["cargo"] = JsonConvert.SerializeObject(cargo);
+                }
+                if (is_measurement_unit)
+                {
+                    measurement_unit = get_measurement_unit();
+                    obj["measurement_unit"] = JsonConvert.SerializeObject(measurement_unit);
+                }
+                if (is_container)
+                {
+                    container = get_container();
+                    obj["container"] = JsonConvert.SerializeObject(container);
+                }
+                if (is_source)
+                {
+                    source = get_sources();
+                    obj["source"] = JsonConvert.SerializeObject(source);
+                }
+                if (is_container_size)
+                {
+                    container_size = get_container_size();
+                    obj["container_size"] = JsonConvert.SerializeObject(container_size); 
+                }
+                if (is_weight_catagory)
+                {
+                    weight_catagory = get_weight_catagory();
+                    obj["weight_catagory"] = JsonConvert.SerializeObject(weight_catagory);
+                }
+                if (is_payment_type)
+                {
+                    payment_type = get_payment_types();
+                    obj["payment_type"] = JsonConvert.SerializeObject(payment_type);
+                }
 
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 JsonSerializerSettings se = new JsonSerializerSettings();
-
-                obj["cargo"] = JsonConvert.SerializeObject(cargo);
-                obj["measurement_unit"] = JsonConvert.SerializeObject(measurement_unit);
-                obj["container"] = JsonConvert.SerializeObject(container);
-                obj["container_size"] = JsonConvert.SerializeObject(container_size);
-                obj["weight_catagory"] = JsonConvert.SerializeObject(weight_catagory);
-                obj["source"] = JsonConvert.SerializeObject(source);
-                obj["payment_type"] = JsonConvert.SerializeObject(payment_type);
 
                 return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
             }
