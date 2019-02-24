@@ -85,6 +85,31 @@ namespace web_api_for_good_transport.Controllers
             }
         }
 
+        [System.Web.Http.Route("api/vehicle/get_vehicle_wrt_transporter_with_driver")]
+        public HttpResponseMessage get_vehicle_wrt_transporter_with_driver(string transporter_id, string driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                SqlCommand cmd = new SqlCommand();
+                string sql = @"spGetVehicleAndDriverWrtTransporter";
+
+                cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                string result = DAL.SerializeDataTable(sql, cmd);
+                var vehicles = JsonConvert.DeserializeObject(result);
+
+                return Request.CreateResponse(HttpStatusCode.OK, vehicles);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
         [HttpPost]
         [System.Web.Http.Route("api/vehicle/add_vehicle_wrt_transporter")]
         public HttpResponseMessage get_all_vehicle_wrt_transporter([FromBody] Vehicle vehicle)
