@@ -1,0 +1,8 @@
+---FileUploadingStarted---04/03/2019 00:38:44
+---FileUploaded D:\FYP\web_api_for_good_transport\web_api_for_good_transport\Images\Customer---04/03/2019 00:38:44
+---FileUploadedEnded04/03/2019 00:38:44
+---FileUploadingStarted---04/03/2019 00:39:33
+---FileUploaded D:\FYP\web_api_for_good_transport\web_api_for_good_transport\Images\Customer---04/03/2019 00:39:36
+---FileUploadedEnded04/03/2019 00:39:37
+---FILE_NAME ngomagprd_1024x1024.jpg---04/03/2019 01:41:27
+---FILE_NAME ngomagprd_1024x1024.jpg---04/03/2019 01:42:00
