@@ -213,5 +213,30 @@ namespace web_api_for_good_transport.Models
             }
         }
 
+        [HttpGet]
+        [System.Web.Http.Route("api/driver/get_driver_details_for_customer")]
+        public HttpResponseMessage get_driver_details_for_customer(string driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "spGetDriverDetailsForCustomer";
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                string driver_details = DAL.SerializeDataTable(sql, cmd);
+
+                obj["success"] = true;
+                obj["data"] = driver_details;
+
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }

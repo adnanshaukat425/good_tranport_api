@@ -126,6 +126,35 @@ namespace web_api_for_good_transport.Controllers
             }
         }
 
+        [System.Web.Http.Route("api/order/request_driver_for_order")]
+        [HttpGet]
+        public HttpResponseMessage RequestDriverForOrder(string driver_id, string customer_id, string order_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "insert into tbl_order_detail (order_id, customer_id, driver_id, status_id) VALUES (@order_id, @customer_id, @driver_id, @status)";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@order_id", order_id);
+                cmd.Parameters.AddWithValue("@customer_id", customer_id);
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.Parameters.AddWithValue("@status", 6);
+
+                DAL.CreateUpdateDelete(sql, cmd);
+
+                return Request.CreateResponse(HttpStatusCode.OK, "OK", Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }        
+
+
+
         #region private_methods
 
         private List<Cargo> get_cargo()

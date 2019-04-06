@@ -26,6 +26,8 @@ namespace web_api_for_good_transport.Models
             {
                 connection_string = @"Data Source= .;Initial Catalog= SmartTransport;Integrated Security=true;";
                 //connection_string = @"Server=den1.mssql8.gear.host;Database=smarttransport1;User Id=smarttransport1;Password=Hp6ssx64-8-0;";
+                //connection_string = @"Data Source= den1.mssql7.gear.host;Initial Catalog= smarttransportdb; User ID = smarttransportdb; Password = Hp815!yN07-i";
+
                 SqlConnection sql_con = new SqlConnection(connection_string);
                 con = sql_con;
             }

@@ -112,7 +112,7 @@ namespace web_api_for_good_transport.Controllers
 
         [HttpPost]
         [System.Web.Http.Route("api/vehicle/add_vehicle_wrt_transporter")]
-        public HttpResponseMessage get_all_vehicle_wrt_transporter([FromBody] Vehicle vehicle)
+        public HttpResponseMessage add_vehicle_wrt_transporter([FromBody] Vehicle vehicle)
         {
             JObject obj = new JObject();
             try
@@ -155,6 +155,73 @@ namespace web_api_for_good_transport.Controllers
                     obj["data"] = "Request failed";
                     return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
                 }
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [HttpPost]
+        [System.Web.Http.Route("api/vehicle/update_vehicle_wrt_transporter")]
+        public HttpResponseMessage update_vehicle_wrt_transporter([FromBody] Vehicle vehicle)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                SqlCommand cmd = new SqlCommand();
+                string sql = "spUpdateVehicle";
+                cmd.Parameters.Add("@vehicle_id", vehicle.vehicle_id);
+                cmd.Parameters.Add("@vehicle_type_id", vehicle.vehicle_type_id);
+                cmd.Parameters.Add("@container_type_id", vehicle.container_type_id);
+                cmd.Parameters.Add("@vehicle_number", vehicle.vehicle_number);
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                object result_ = DAL.SelectScalar(sql, cmd);
+                string result = result_ != null ? result_.ToString() : "";
+
+                if (result != null && !String.IsNullOrEmpty(result) && result != "0")
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, vehicle);
+                }
+                else
+                {
+                    if (result == "Vehicle number already present")
+                    {
+                        obj["success"] = false;
+                        obj["data"] = "Vehicle number already present";
+                        return Request.CreateResponse(HttpStatusCode.NotAcceptable, obj);
+                    }
+                    else
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK, vehicle);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [HttpGet]
+        [System.Web.Http.Route("api/vehicle/get_vehicle")]
+        public HttpResponseMessage get_vehicle(int vehicle_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"select vehicle_id, vehicle_number, coalesce(vehicle_type_id,0) as vehicle_type_id, coalesce(container_type_id, 0) as container_type_id, transporter_id
+                            from tbl_vehicle where vehicle_id = @vehicle_id";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@vehicle_id", vehicle_id);
+
+                string result = DAL.SerializeDataTable(sql, cmd);
+                List<Vehicle> vehicle = JsonConvert.DeserializeObject<List<Vehicle>>(result);
+                return Request.CreateResponse(HttpStatusCode.OK, vehicle[0]);
             }
             catch (Exception ex)
             {
