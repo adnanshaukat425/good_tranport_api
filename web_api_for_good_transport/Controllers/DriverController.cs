@@ -238,5 +238,29 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [HttpGet]
+        [System.Web.Http.Route("api/driver/get_driver_wrt_order_id")]
+        public HttpResponseMessage get_driver_wrt_order_id(string order_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "spGetDriverWRTOrderId";
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@order_id", order_id);
+                string driver_details = DAL.SerializeDataTable(sql, cmd);
+
+                obj["drivers"] = DAL.SerializeDataTable(sql, cmd);
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }

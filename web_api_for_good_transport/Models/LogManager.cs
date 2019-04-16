@@ -12,7 +12,13 @@ namespace web_api_for_good_transport.Models
 
         public void InsertLog(string log_message)
         {
-            File.AppendAllText(file_path, DateTime.Now.ToString() + ": " + log_message + Environment.NewLine);
+            try
+            {
+                File.AppendAllText(file_path, DateTime.Now.ToString() + ": " + log_message + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }

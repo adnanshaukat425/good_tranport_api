@@ -26,7 +26,6 @@ namespace web_api_for_good_transport.Controllers
             {
                 DataTable result = DAL.RunStoreProc(order, "spPlaceOrder");
                 Type user_type = order.GetType();
-                int i = 0;
                 order.order_id = Convert.ToInt32(result.Rows[0]["order_id"].ToString());
                 return Request.CreateResponse(HttpStatusCode.OK, order);
             }
@@ -114,9 +113,8 @@ namespace web_api_for_good_transport.Controllers
                 SqlCommand cmd = new SqlCommand();
                 cmd.Parameters.AddWithValue("@customer_id", customer_id);
                 cmd.CommandType = CommandType.StoredProcedure;
-                DataTable dt = DAL.Select(sql, cmd);
 
-                return Request.CreateResponse(HttpStatusCode.OK, dt, Configuration.Formatters.JsonFormatter);
+                return Request.CreateResponse(HttpStatusCode.OK, JsonConvert.SerializeObject(DAL.Select(sql, cmd)), Configuration.Formatters.JsonFormatter);
             }
             catch (Exception ex)
             {
@@ -128,18 +126,17 @@ namespace web_api_for_good_transport.Controllers
 
         [System.Web.Http.Route("api/order/request_driver_for_order")]
         [HttpGet]
-        public HttpResponseMessage RequestDriverForOrder(string driver_id, string customer_id, string order_id)
+        public HttpResponseMessage RequestDriverForOrder(string driver_id, string order_id)
         {
             JObject obj = new JObject();
             try
             {
-                string sql = "insert into tbl_order_detail (order_id, customer_id, driver_id, status_id) VALUES (@order_id, @customer_id, @driver_id, @status)";
+                string sql = "insert into tbl_order_detail (order_id, driver_id, status_id) VALUES (@order_id, @driver_id, @status)";
 
                 SqlCommand cmd = new SqlCommand();
                 cmd.Parameters.AddWithValue("@order_id", order_id);
-                cmd.Parameters.AddWithValue("@customer_id", customer_id);
                 cmd.Parameters.AddWithValue("@driver_id", driver_id);
-                cmd.Parameters.AddWithValue("@status", 6);
+                cmd.Parameters.AddWithValue("@status", 5);
 
                 DAL.CreateUpdateDelete(sql, cmd);
 
@@ -153,7 +150,26 @@ namespace web_api_for_good_transport.Controllers
             }
         }        
 
+        [System.Web.Http.Route("api/order/get_order_wrt_driver")]
+        [HttpGet]
+        public HttpResponseMessage RequestDriverForOrder(string driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "";
+                SqlCommand cmd = new SqlCommand();
+                DAL.Select(sql, cmd);
 
+                return Request.CreateResponse(HttpStatusCode.OK, "OK", Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }        
 
         #region private_methods
 

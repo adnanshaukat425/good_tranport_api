@@ -65,5 +65,24 @@ namespace web_api_for_good_transport.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+
+        [HttpPost]
+        [System.Web.Http.Route("api/notification/check_tracking")]
+        public HttpResponseMessage check_tracking([FromBody] Route route)
+        {
+            TrackingHub tracking_hub = new TrackingHub();
+            tracking_hub.InsertLocation(route);
+
+            return Request.CreateResponse(HttpStatusCode.OK);
+        }
+
+        [System.Web.Http.Route("api/notification/check_location_broadcasting")]
+        public HttpResponseMessage check_location_broadcasting([FromBody] Route route)
+        {
+            TrackingHub tracking_hub = new TrackingHub();
+            tracking_hub.BroadCastRoute(route);
+            return Request.CreateResponse(HttpStatusCode.OK);
+        }
     }
 }

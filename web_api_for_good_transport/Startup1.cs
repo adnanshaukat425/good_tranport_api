@@ -19,7 +19,7 @@ namespace web_api_for_good_transport
                 var hubConfiguration = new HubConfiguration
                 {
                     EnableJSONP = true,
-                    EnableJavaScriptProxies = false
+                    EnableJavaScriptProxies = true
                 };
                 map.RunSignalR(hubConfiguration);
             });

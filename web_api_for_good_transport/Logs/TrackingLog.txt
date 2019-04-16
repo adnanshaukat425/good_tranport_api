@@ -1,0 +1,4 @@
+14/04/2019 12:53:28: Route.InsertRoute called
+14/04/2019 12:53:35: Route.InsertRoute called SQL: INSERT INTO tbl_route (order_detail_id,latitude,longitude) VALUES (@order_detail_id,@latitude,@longitude)
+14/04/2019 12:53:35: Exiting Route.InsertRoute With: OK
+14/04/2019 12:53:35: ---UpdateLocation--0---

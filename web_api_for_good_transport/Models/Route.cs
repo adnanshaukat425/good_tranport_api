@@ -13,7 +13,7 @@ namespace web_api_for_good_transport.Models
         public int order_detail_id { get; set; }
         public string latitude { get; set; }
         public string longitude { get; set; }
-        public DateTime date_timeP { get; set; }
+        public DateTime date_time { get; set; }
         LogManager log_manager;
 
         public Route(string log_file_path)
@@ -29,6 +29,7 @@ namespace web_api_for_good_transport.Models
                 log_manager.InsertLog("Route.InsertRoute called");
                 SqlCommand cmd = new SqlCommand();
                 string sql = DAL.get_sql("insert", "tbl_route", route, new string[] { "route_id", "date_time" }, null, out cmd);
+                log_manager.InsertLog("Route.InsertRoute called SQL: " + sql);
                 DAL.CreateUpdateDelete(sql, cmd);
 
                 log_manager.InsertLog("Exiting Route.InsertRoute With: OK");

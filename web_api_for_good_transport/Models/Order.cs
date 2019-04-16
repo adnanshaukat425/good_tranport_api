@@ -10,6 +10,7 @@ namespace web_api_for_good_transport.Models
         public int order_id { get; set; }
         public int cargo_type_id { get; set; }
         public int container_type_id { get; set; }
+        public int customer_id { get; set; }
         public int vehicle_type_id { get; set; }
         public string weight_catagory_id { get; set; }
         public string cargo_volume { get; set; }
