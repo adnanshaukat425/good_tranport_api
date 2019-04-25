@@ -1,4 +1,24 @@
-14/04/2019 12:53:28: Route.InsertRoute called
-14/04/2019 12:53:35: Route.InsertRoute called SQL: INSERT INTO tbl_route (order_detail_id,latitude,longitude) VALUES (@order_detail_id,@latitude,@longitude)
-14/04/2019 12:53:35: Exiting Route.InsertRoute With: OK
-14/04/2019 12:53:35: ---UpdateLocation--0---
+21/04/2019 07:26:38: --InsertLocation Called-- 24.8432 69.98723
+21/04/2019 07:26:38: Route.InsertRoute called
+21/04/2019 07:26:38: Route.InsertRoute called SQL: INSERT INTO tbl_route (order_detail_id,latitude,longitude) VALUES (@order_detail_id,@latitude,@longitude)
+21/04/2019 07:26:38: Exiting Route.InsertRoute With: OK
+21/04/2019 07:26:40: -----------------------Connected Clients (0)-----------------------
+21/04/2019 07:26:40: Starting infinite routing
+21/04/2019 07:26:40: Getting lat long
+21/04/2019 07:26:40: Starting broadcast
+21/04/2019 07:26:40: Latitude: 24.12321
+21/04/2019 07:26:40: longitude: 69.3423423
+21/04/2019 07:26:40: sending lat long to 
+21/04/2019 07:26:41: successfully sent
+21/04/2019 07:26:46: Latitude: 24.12321
+21/04/2019 07:26:46: longitude: 69.3423423
+21/04/2019 07:26:46: sending lat long to 
+21/04/2019 07:26:46: successfully sent
+21/04/2019 07:26:51: Latitude: 24.882751
+21/04/2019 07:26:51: longitude: 67.125545
+21/04/2019 07:26:51: sending lat long to 
+21/04/2019 07:26:51: successfully sent
+21/04/2019 07:26:56: Latitude: 24.882751
+21/04/2019 07:26:56: longitude: 67.125545
+21/04/2019 07:26:56: sending lat long to 
+21/04/2019 07:26:56: successfully sent

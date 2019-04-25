@@ -152,16 +152,18 @@ namespace web_api_for_good_transport.Controllers
 
         [System.Web.Http.Route("api/order/get_order_wrt_driver")]
         [HttpGet]
-        public HttpResponseMessage RequestDriverForOrder(string driver_id)
+        public HttpResponseMessage RequestDriverForOrder(string driver_id, string status_id)
         {
             JObject obj = new JObject();
             try
             {
-                string sql = "";
+                string sql = "spGetOrdersWrtDriverId";
                 SqlCommand cmd = new SqlCommand();
-                DAL.Select(sql, cmd);
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.Parameters.AddWithValue("@status_id", status_id);
+                DataTable dt = DAL.Select(sql, cmd);
 
-                return Request.CreateResponse(HttpStatusCode.OK, "OK", Configuration.Formatters.JsonFormatter);
+                return Request.CreateResponse(HttpStatusCode.OK, dt, Configuration.Formatters.JsonFormatter);
             }
             catch (Exception ex)
             {
