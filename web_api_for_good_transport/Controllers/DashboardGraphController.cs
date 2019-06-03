@@ -85,5 +85,42 @@ namespace web_api_for_good_transport.Controllers
 
             return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
         }
+
+        [System.Web.Http.Route("api/dashboard_graph/get_last_six_month_order_of_driver")]
+        public HttpResponseMessage get_last_six_month_order_of_driver(string driver_id)
+        {
+            JObject obj = new JObject();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand();
+                string sql = @"spGetLastSixMonthOrderOfDriver";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                DataTable dt = DAL.Select(sql, cmd);
+
+                List<object> x_axis = new List<object>();
+                List<object> y_axis = new List<object>();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    x_axis.Add(dr["month"].ToString());
+                    y_axis.Add(dr["count"].ToString());
+                }
+
+                DashboardGraph dashboardGraph = new DashboardGraph();
+                dashboardGraph.x_axis = x_axis;
+                dashboardGraph.y_axis = y_axis;
+
+                return Request.CreateResponse(HttpStatusCode.OK, dashboardGraph);
+
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }

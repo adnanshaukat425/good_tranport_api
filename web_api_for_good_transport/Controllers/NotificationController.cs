@@ -38,15 +38,17 @@ namespace web_api_for_good_transport.Controllers
         }
 
         [HttpGet]
-        [System.Web.Http.Route("api/notification/get_notification")]
-        public HttpResponseMessage get_notification()
+        [System.Web.Http.Route("api/notification/get_broadcast_notification")]
+        public HttpResponseMessage get_broadcast_notification(string user_id)
         {
             JObject obj = new JObject();
             try
             {
-                string sql = @"select * from tbl_notification";
+                string sql = @"select * from tbl_notification where notification_for_user_id = @user_id and is_pushed = 0";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.Add("@user_id", user_id);
                 List<Notification> notification_list = new List<Notification>();
-                DataTable dt = DAL.Select(sql);
+                DataTable dt = DAL.Select(sql, cmd);
                 foreach (DataRow item in dt.Rows)
                 {
                     Notification notification = new Notification();
@@ -66,6 +68,26 @@ namespace web_api_for_good_transport.Controllers
             }
         }
 
+        [HttpPost]
+        [System.Web.Http.Route("api/notification/set_notification_to_pushed")]
+        public HttpResponseMessage set_notification_to_pushed([FromBody] int[] notification_ids)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"Update tbl_notification set is_pushed = 1 where notification_id in (" + String.Join(",", notification_ids) + ")";
+
+                string row_effected = DAL.CreateUpdateDelete(sql);
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
 
         [HttpPost]
         [System.Web.Http.Route("api/notification/check_tracking")]
@@ -84,5 +106,7 @@ namespace web_api_for_good_transport.Controllers
             tracking_hub.BroadCastRoute(route);
             return Request.CreateResponse(HttpStatusCode.OK);
         }
+
+
     }
 }

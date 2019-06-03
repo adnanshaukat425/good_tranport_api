@@ -74,7 +74,13 @@ namespace web_api_for_good_transport.SignalR
         {
             File.AppendAllText(log_file_path, "---BroadCasting Notification--" + notification.notification_id + "---" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + Environment.NewLine);
 
-            String[] broadCastClients = connected_clients.Where(x => x.Value == notification.user_id + "").Select(x => x.Key).ToArray();
+            String[] broadCastClients = connected_clients.Where(x => x.Value == notification.notification_for_user_id + "").Select(x => x.Key).ToArray();
+
+            for (int i = 0; i < broadCastClients.Length; i++)
+            {
+                File.AppendAllText(log_file_path, "---BroadCasting Notification--- CLIENT ID: " + broadCastClients[i] + "-- " + notification.user_id + " " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss") + Environment.NewLine);
+            }            
+
             hubContext.Clients.Clients(broadCastClients).BroadCastNotification(notification);
         }
     }

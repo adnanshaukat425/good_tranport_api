@@ -121,22 +121,6 @@ namespace web_api_for_good_transport.Models
             return rows_effected.ToString();
         }
 
-        public static string CreateUpdateDelete(string sql, OleDbCommand cmd = null)
-        {
-            if (cmd == null)
-            {
-                cmd = new OleDbCommand();
-            }
-
-            OleDbConnection con = (OleDbConnection)GetConnection("access");
-            cmd.CommandText = sql;
-            cmd.Connection = con;
-            con.Open();
-            int rows_effected = cmd.ExecuteNonQuery();
-            con.Close();
-            return rows_effected.ToString();
-        }
-
         public static object SelectScalar(string sql, SqlCommand cmd)
         {
             SqlConnection con = (SqlConnection)GetConnection("sql");

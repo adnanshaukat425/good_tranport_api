@@ -262,5 +262,61 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [HttpPost]
+        [System.Web.Http.Route("api/driver/update_driver_source_destination")]
+        public HttpResponseMessage update_driver_source_destination(string driver_id, string source, string destination, string status)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"update tbl_driver_details set source = @source, destination = @destination, status = @status 
+                where driver_id = @driver_id";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@source", source);
+                cmd.Parameters.AddWithValue("@destination", destination);
+                cmd.Parameters.AddWithValue("@status", status);
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+
+                DAL.CreateUpdateDelete(sql, cmd);
+
+                obj["data"] = "OK";
+                obj["success"] = true;
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [HttpGet]
+        [System.Web.Http.Route("api/driver/get_driver_source_destination")]
+        public HttpResponseMessage update_driver_source_destination(string driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"select source, destination, status from tbl_driver_details where driver_id = @driver_id";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+
+                string res = DAL.SerializeDataTable(sql, cmd);
+
+                obj["data"] = res;
+                obj["success"] = true;
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }

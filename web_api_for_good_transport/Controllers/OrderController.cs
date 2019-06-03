@@ -148,20 +148,71 @@ namespace web_api_for_good_transport.Controllers
                 obj["data"] = ex.Message + " " + ex.StackTrace;
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
-        }        
+        }
 
-        [System.Web.Http.Route("api/order/get_order_wrt_driver")]
+        [System.Web.Http.Route("api/order/get_order_wrt_driver_and_status_id")]
         [HttpGet]
-        public HttpResponseMessage RequestDriverForOrder(string driver_id, string status_id)
+        public HttpResponseMessage get_order_wrt_driver_and_status_id(int driver_id, int status_id)
         {
             JObject obj = new JObject();
             try
             {
+                //--pass specific status otherwise pass 0 to get all the data regardless of status.
                 string sql = "spGetOrdersWrtDriverId";
                 SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@driver_id", driver_id);
                 cmd.Parameters.AddWithValue("@status_id", status_id);
-                DataTable dt = DAL.Select(sql, cmd);
+                string dt = DAL.SerializeDataTable(sql, cmd);
+
+                return Request.CreateResponse(HttpStatusCode.OK, dt, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [System.Web.Http.Route("api/order/get_requested_orders")]
+        [HttpGet]
+        public HttpResponseMessage get_requested_orders(int driver_id, int status_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                //--pass specific status otherwise pass 0 to get all the data regardless of status.
+                string sql = "spGetOrdersWrtDriverId";
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.Parameters.AddWithValue("@status_id", status_id);
+                string dt = DAL.SerializeDataTable(sql, cmd);
+
+                return Request.CreateResponse(HttpStatusCode.OK, dt, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [System.Web.Http.Route("api/order/confirm_order")]
+        [HttpGet]
+        public HttpResponseMessage confirm_order(int driver_id, string order_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "spConfirmOrder";
+                SqlCommand cmd = new SqlCommand();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.Parameters.AddWithValue("@order_id", order_id);
+                string dt = DAL.SerializeDataTable(sql, cmd);
 
                 return Request.CreateResponse(HttpStatusCode.OK, dt, Configuration.Formatters.JsonFormatter);
             }

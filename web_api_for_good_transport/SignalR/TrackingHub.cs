@@ -64,28 +64,28 @@ namespace web_api_for_good_transport.SignalR
         public void BroadCastRoute(Route route)
         {
 
-            //log_manager.InsertLog("---UpdateLocation--" + route.order_detail_id + "---");
-            ////log_manager.InsertLog("---HubContext--" + hubContext.ToString() + "---");
-
-            //String[] broadCastClients = connected_clients.Where(x => x.Value == route.order_detail_id + "").Select(x => x.Key).ToArray();
-            //log_manager.InsertLog("---UpdateLocation--" + broadCastClients.Count() + "---");
-            //if (broadCastClients.Count() == 0)
-            //{
-            //    log_manager.InsertLog("---UpdateLocation-- Broadcasting location to " + broadCastClients.Count() + " clients ---");
-            //    hubContext.Clients.All.UpdateLocation(route);
-            //}
-            //else
-            //{
-            //    log_manager.InsertLog("---UpdateLocation-- multicasting location to " + broadCastClients.Count() + " clients ---");
-            //    hubContext.Clients.Clients(broadCastClients).UpdateLocation(route);
-            //}
-            //log_manager.InsertLog("--Successfully updated location");
-            log_manager.InsertLog("-----------------------Connected Clients (" + connected_clients.Count + ")-----------------------");
-            new Thread(() =>
+            log_manager.InsertLog("---UpdateLocation--" + route.order_detail_id + "---");
+            //log_manager.InsertLog("---HubContext--" + hubContext.ToString() + "---");
+            string data = route.latitude + ";" + route.longitude;
+            String[] broadCastClients = connected_clients.Where(x => x.Value == route.order_detail_id + "").Select(x => x.Key).ToArray();
+            log_manager.InsertLog("---UpdateLocation--" + broadCastClients.Count() + "---");
+            if (broadCastClients.Count() == 0)
             {
-                log_manager.InsertLog("Starting infinite routing");
-                infinite_routing(log_manager, route, hubContext);
-            }).Start();
+                log_manager.InsertLog("---UpdateLocation-- Broadcasting location to " + broadCastClients.Count() + " clients ---");
+                hubContext.Clients.All.UpdateLocation(data);
+            }
+            else
+            {
+                log_manager.InsertLog("---UpdateLocation-- multicasting location to " + broadCastClients.Count() + " clients ---");
+                hubContext.Clients.Clients(broadCastClients).UpdateLocation(data);
+            }
+            log_manager.InsertLog("--Successfully updated location");
+            log_manager.InsertLog("-----------------------Connected Clients (" + connected_clients.Count + ")-----------------------");
+            //new Thread(() =>
+            //{
+            //    log_manager.InsertLog("Starting infinite routing");
+            //    infinite_routing(log_manager, route, hubContext);
+            //}).Start();
         }
 
         private void infinite_routing(LogManager log_manager, Route route, IHubContext hubContext)
@@ -97,18 +97,18 @@ namespace web_api_for_good_transport.SignalR
                 string sql = "select latitude, longitude from tbl_route";
                 DataTable dt = DAL.Select(sql);
                 log_manager.InsertLog("Starting broadcast");
-                for (int i = 0; i < dt.Rows.Count; i++)
-                {
-                    route.latitude = dt.Rows[i][0].ToString();
-                    route.longitude = dt.Rows[i][1].ToString();
-                    log_manager.InsertLog("Latitude: " + route.latitude);
-                    log_manager.InsertLog("longitude: " + route.longitude);
-                    log_manager.InsertLog("sending lat long to ");
-                    string data = route.latitude + ";" + route.longitude;
-                    hubContext.Clients.All.UpdateLocation(data);
-                    log_manager.InsertLog("successfully sent");
-                    Thread.Sleep(2000);
-                }
+                //for (int i = 0; i < dt.Rows.Count; i++)
+                //{
+                //    route.latitude = dt.Rows[i][0].ToString();
+                //    route.longitude = dt.Rows[i][1].ToString();
+                //    log_manager.InsertLog("Latitude: " + route.latitude);
+                //    log_manager.InsertLog("longitude: " + route.longitude);
+                //    log_manager.InsertLog("sending lat long to ");
+                //    string data = route.latitude + ";" + route.longitude;
+                //    hubContext.Clients.All.UpdateLocation(data);
+                //    log_manager.InsertLog("successfully sent");
+                //    Thread.Sleep(2000);
+                //}
                 //goto restart;
             }
             catch (Exception ex)

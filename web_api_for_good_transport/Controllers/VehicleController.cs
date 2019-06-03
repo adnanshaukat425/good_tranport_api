@@ -173,10 +173,10 @@ namespace web_api_for_good_transport.Controllers
             {
                 SqlCommand cmd = new SqlCommand();
                 string sql = "spUpdateVehicle";
-                cmd.Parameters.Add("@vehicle_id", vehicle.vehicle_id);
-                cmd.Parameters.Add("@vehicle_type_id", vehicle.vehicle_type_id);
-                cmd.Parameters.Add("@container_type_id", vehicle.container_type_id);
-                cmd.Parameters.Add("@vehicle_number", vehicle.vehicle_number);
+                cmd.Parameters.AddWithValue("@vehicle_id", vehicle.vehicle_id);
+                cmd.Parameters.AddWithValue("@vehicle_type_id", vehicle.vehicle_type_id);
+                cmd.Parameters.AddWithValue("@container_type_id", vehicle.container_type_id);
+                cmd.Parameters.AddWithValue("@vehicle_number", vehicle.vehicle_number);
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 object result_ = DAL.SelectScalar(sql, cmd);
                 string result = result_ != null ? result_.ToString() : "";
