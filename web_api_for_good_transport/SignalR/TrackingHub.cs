@@ -15,6 +15,8 @@ namespace web_api_for_good_transport.SignalR
     public class TrackingHub : Hub
     {
         private static ConcurrentDictionary<string, string> connected_clients = new ConcurrentDictionary<string, string>();         // <connectionId, userName>
+
+        private static ConcurrentDictionary<string, string> connected_clients_for_transporter = new ConcurrentDictionary<string, string>(); 
         string log_file_path = HttpContext.Current.Server.MapPath("~/Logs/TrackingLog.txt");
         LogManager log_manager = new LogManager();
         IHubContext hubContext = GlobalHost.ConnectionManager.GetHubContext<TrackingHub>();
@@ -22,10 +24,12 @@ namespace web_api_for_good_transport.SignalR
         public override Task OnConnected()
         {
             log_manager.file_path = log_file_path;
-            string order_detail_id = Context.QueryString["order_detail_id"];
-            order_detail_id = "1";//For testing
-            log_manager.InsertLog("---Connecting Hub, order_detail_id: " + order_detail_id + ", ConnectionId: " + Context.ConnectionId + "---");
+            string order_detail_id = Context.Request.Headers["order_detail_id"];
+            string user_id = Context.Request.Headers["user_id"];
+            //order_detail_id = "1";//For testing
+            log_manager.InsertLog("---Connecting Hub, order_detail_id: " + order_detail_id + ", User_id "+ user_id +", ConnectionId: " + Context.ConnectionId + "---");
             connected_clients.TryAdd(Context.ConnectionId, order_detail_id);
+            connected_clients_for_transporter.TryAdd(Context.ConnectionId, user_id);
             return base.OnConnected();
         }
 
@@ -33,7 +37,9 @@ namespace web_api_for_good_transport.SignalR
         {
             string id = Context.ConnectionId;
             string order_detail_id;
+            string user_id;
             connected_clients.TryRemove(id, out order_detail_id);
+            connected_clients_for_transporter.TryRemove(Context.ConnectionId, out user_id);
             log_manager.InsertLog("---Disconnecting Hub, order_detail_id: " + order_detail_id + ", ConnectionId: " + Context.ConnectionId + "---");
             return base.OnDisconnected();
         }
@@ -47,15 +53,17 @@ namespace web_api_for_good_transport.SignalR
         {
             //DoConnect();
             string order_detail_id = Context.QueryString["order_detail_id"];
+            string user_id = Context.QueryString["user_id"];
             log_manager.InsertLog("---Reconnecting Hub, order_detail_id: " + order_detail_id + ", ConnectionId: " + Context.ConnectionId + "---");
             connected_clients.TryAdd(Context.ConnectionId, order_detail_id);
+            connected_clients_for_transporter.TryAdd(Context.ConnectionId, user_id);
             return base.OnReconnected();
         }
 
         public void InsertLocation(Route route)
         {
             Route insert_route = new Route(log_file_path);
-            log_manager.file_path = HttpContext.Current.Server.MapPath("~/Logs/TrackingLog.txt"); ;
+            log_manager.file_path = HttpContext.Current.Server.MapPath("~/Logs/TrackingLog.txt");
             log_manager.InsertLog("--InsertLocation Called-- " + route.latitude + " " + route.longitude);
             insert_route.InsertRoute(route);
             BroadCastRoute(route);
@@ -63,9 +71,7 @@ namespace web_api_for_good_transport.SignalR
 
         public void BroadCastRoute(Route route)
         {
-
             log_manager.InsertLog("---UpdateLocation--" + route.order_detail_id + "---");
-            //log_manager.InsertLog("---HubContext--" + hubContext.ToString() + "---");
             string data = route.latitude + ";" + route.longitude;
             String[] broadCastClients = connected_clients.Where(x => x.Value == route.order_detail_id + "").Select(x => x.Key).ToArray();
             log_manager.InsertLog("---UpdateLocation--" + broadCastClients.Count() + "---");
@@ -81,11 +87,20 @@ namespace web_api_for_good_transport.SignalR
             }
             log_manager.InsertLog("--Successfully updated location");
             log_manager.InsertLog("-----------------------Connected Clients (" + connected_clients.Count + ")-----------------------");
-            //new Thread(() =>
-            //{
-            //    log_manager.InsertLog("Starting infinite routing");
-            //    infinite_routing(log_manager, route, hubContext);
-            //}).Start();
+        }
+
+        public void UpdateDriverWrtTransporter(string latitude, string longitude, int driver_id, string driver_name, string user_id)
+        {
+            log_manager.file_path = HttpContext.Current.Server.MapPath("~/Logs/TrackingLog.txt");
+            log_manager.InsertLog("---UpdateDriverLocation--" + driver_id + ", " + user_id + "---");
+            string data = latitude + ";" + longitude + ";" + driver_id + ";" + driver_name;
+            String[] broadCastClients = connected_clients_for_transporter.Where(x => x.Value == user_id + "").Select(x => x.Key).ToArray();
+
+            log_manager.InsertLog("---UpdateDriverLocation--" + broadCastClients.Count() + "---");
+            hubContext.Clients.Clients(broadCastClients).UpdateDriverLocationForTransporter(data);
+
+            log_manager.InsertLog("--Successfully updated Driver location");
+            log_manager.InsertLog("-----------------------Connected Clients (" + connected_clients_for_transporter.Count + ")-----------------------");
         }
 
         private void infinite_routing(LogManager log_manager, Route route, IHubContext hubContext)

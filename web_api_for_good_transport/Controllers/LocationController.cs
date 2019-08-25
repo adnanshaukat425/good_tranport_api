@@ -9,11 +9,14 @@ using System.Net.Http;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
+using web_api_for_good_transport.SignalR;
 
 namespace web_api_for_good_transport.Models
 {
     public class LocationController : ApiController
     {
+        TrackingHub tracking_hub = new TrackingHub();
+        
         [System.Web.Http.Route("api/location/get_location")]
         public HttpResponseMessage get_location()
         {
@@ -133,15 +136,16 @@ namespace web_api_for_good_transport.Models
             return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
         }
 
+        [HttpGet]
         [System.Web.Http.Route("api/location/update_current_lat_long")]
-        public HttpResponseMessage update_current_lat_long(int user_id, string latitude, string longitude)
+        public HttpResponseMessage update_current_lat_long(int driver_id, string latitude, string longitude, string driver_name, string transporter_id)
         {
             JObject obj = new JObject();
             try
             {
                 string sql = @"spUpdateLatLong";
                 SqlCommand cmd = new SqlCommand();
-                cmd.Parameters.AddWithValue("@user_id", user_id);
+                cmd.Parameters.AddWithValue("@user_id", driver_id);//driver_id
                 cmd.Parameters.AddWithValue("@latitude", latitude);
                 cmd.Parameters.AddWithValue("@longitude", longitude);
 
@@ -149,6 +153,8 @@ namespace web_api_for_good_transport.Models
                 DataTable dt = DAL.Select(sql, cmd);
                 obj["success"] = true;
                 obj["data"] = "updated";
+                
+                tracking_hub.UpdateDriverWrtTransporter(latitude, longitude, driver_id, driver_name, transporter_id);
                 return Request.CreateResponse(HttpStatusCode.OK, obj);
             }
             catch (Exception ex)
@@ -159,6 +165,32 @@ namespace web_api_for_good_transport.Models
             }
 
             
+        }
+
+        [HttpGet]
+        [System.Web.Http.Route("api/location/get_driver_latLng_from_transporter_id")]
+        public HttpResponseMessage get_driver_latLng_from_transporter_id(int transporter_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = "spGetDriverLatLngForTransporter";
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@transporter_id", transporter_id);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                string response = DAL.SerializeDataTable(sql, cmd);
+                obj["success"] = response != "[]" ? true : false;
+                obj["data"] = response;
+
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj, Configuration.Formatters.JsonFormatter);
+            }
         }
     }
 }

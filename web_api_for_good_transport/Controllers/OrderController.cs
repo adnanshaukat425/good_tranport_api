@@ -222,7 +222,40 @@ namespace web_api_for_good_transport.Controllers
                 obj["data"] = ex.Message + " " + ex.StackTrace;
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
-        }        
+        }
+
+        [System.Web.Http.Route("api/order/get_order_cost")]
+        [HttpGet]
+        public HttpResponseMessage get_order_cost(string source_id, string destination_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"select tbl_location_price.transport_location_id, location_price_id, coalesce([20ft_price], 0) as [20ft_price], coalesce([40ft_price], 0) as [40ft_price], coalesce(lcl_price, 0) as lcl_price from tbl_transport_location
+                            inner join tbl_location_price
+                            on tbl_transport_location.transport_location_id = tbl_location_price.transport_location_id
+                            where tbl_transport_location.source_id = @source_id and 
+                            (tbl_transport_location.D1 = @destination_id OR tbl_transport_location.D2 = @destination_id OR tbl_transport_location.D3 = @destination_id
+                            OR tbl_transport_location.D4 = @destination_id OR tbl_transport_location.D5 = @destination_id OR tbl_transport_location.D6 = @destination_id
+                            OR tbl_transport_location.D7 = @destination_id OR tbl_transport_location.D8 = @destination_id OR tbl_transport_location.D9 = @destination_id
+                            OR tbl_transport_location.D10 = @destination_id)";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@source_id", source_id);
+                cmd.Parameters.AddWithValue("@destination_id", destination_id);
+
+                string response = DAL.SerializeDataTable(sql, cmd);
+                obj["success"] = response.Trim() == "[]" ? false : true;
+                obj["data"] = response;
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
 
         #region private_methods
 

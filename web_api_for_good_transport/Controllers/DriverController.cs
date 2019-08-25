@@ -318,5 +318,84 @@ namespace web_api_for_good_transport.Models
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
             }
         }
+
+        [HttpPost]
+        [System.Web.Http.Route("api/driver/update_driver_status")]
+        public HttpResponseMessage update_driver_status(int status, int driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"update tbl_users set status = @status where user_id = @driver_id";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                cmd.Parameters.AddWithValue("@status", status);
+
+                string res = DAL.CreateUpdateDelete(sql, cmd);
+
+                obj["data"] = res;
+                obj["success"] = true;
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [HttpGet]
+        [System.Web.Http.Route("api/driver/get_driver_status")]
+        public HttpResponseMessage get_driver_status(int driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"select status from tbl_users where user_id = @driver_id";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+                
+                var res = DAL.SelectScalar(sql, cmd);
+
+                obj["data"] = res != null ? res.ToString() : "0";
+                obj["success"] = true;
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
+
+        [HttpGet]
+        [System.Web.Http.Route("api/driver/get_driver_transporter_id")]
+        public HttpResponseMessage get_driver_transporter_id(int driver_id)
+        {
+            JObject obj = new JObject();
+            try
+            {
+                string sql = @"select transporter_id from tbl_driver_transporter where driver_id = @driver_id";
+
+                SqlCommand cmd = new SqlCommand();
+                cmd.Parameters.AddWithValue("@driver_id", driver_id);
+
+                var res = DAL.SelectScalar(sql, cmd);
+
+                obj["data"] = res != null ? res.ToString() : "0";
+                obj["success"] = true;
+                return Request.CreateResponse(HttpStatusCode.OK, obj, Configuration.Formatters.JsonFormatter);
+            }
+            catch (Exception ex)
+            {
+                obj["success"] = false;
+                obj["data"] = ex.Message + " " + ex.StackTrace;
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, obj);
+            }
+        }
     }
 }
